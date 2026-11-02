@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Roteiro das Aulas</title>
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F3F6F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E151B" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aulas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:wght@600;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: lista de aulas; cada aula abre em telas por abas (uma pergunta por tela).
+   Modo "Dar aula" so le; modo "Editar" deixa mudar tudo na propria tela.
+   Vermelho = versiculo indispensavel. Quadro = bloco escuro com o que vai no quadro. */
+:root {
+  --bg: #F3F6F8; --surface: #FFFFFF; --fg: #12202B; --muted: #4B5E6C; --line: #C9D4DC;
+  --accent: #0B6E6E; --accent-soft: #DDF0EF; --accent-ink: #FFFFFF;
+  --manga-bg: #FFF0D2; --manga-fg: #4F2E00; --manga-line: #E0A53A;
+  --warn: #9A2A2A; --must: #B3201D; --chip: #E4EAEF;
+  --board-bg: #1E2B34; --board-fg: #F2F7F9; --board-lbl: #9FD8D5;
+  --field: #FFFFFF; --danger: #B3201D; --danger-ink: #FFFFFF;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E151B; --surface: #16212A; --fg: #E9EFF3; --muted: #A2B3C0; --line: #2B3C49;
+    --accent: #5FD0CB; --accent-soft: #12302F; --accent-ink: #062524;
+    --manga-bg: #33270F; --manga-fg: #FFD995; --manga-line: #A8741A;
+    --warn: #FF9C9C; --must: #FF8A80; --chip: #1F2D38;
+    --board-bg: #0A1014; --board-fg: #E9EFF3; --board-lbl: #5FD0CB;
+    --field: #0F1920; --danger: #FF8A80; --danger-ink: #2A0A08;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E151B; --surface: #16212A; --fg: #E9EFF3; --muted: #A2B3C0; --line: #2B3C49;
+  --accent: #5FD0CB; --accent-soft: #12302F; --accent-ink: #062524;
+  --manga-bg: #33270F; --manga-fg: #FFD995; --manga-line: #A8741A;
+  --warn: #FF9C9C; --must: #FF8A80; --chip: #1F2D38;
+  --board-bg: #0A1014; --board-fg: #E9EFF3; --board-lbl: #5FD0CB;
+  --field: #0F1920; --danger: #FF8A80; --danger-ink: #2A0A08;
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: var(--fs); line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 120px;
+  overflow-wrap: anywhere;
+}
+body.locked { overflow: hidden; }
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--bg);
+}
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 2px;
+}
+
+/* Cabecalho */
+.top { padding: 10px 0 4px; }
+.top-row { display: flex; align-items: center; justify-content: space-between; gap: 6px 10px; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-weight: 800; font-size: .9rem; letter-spacing: .02em; text-transform: uppercase; color: var(--muted); min-width: 0; }
+.back { min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px 0 0; color: var(--accent); font-weight: 700; text-decoration: none; }
+.tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.aula-name { font-family: var(--font-display); font-weight: 800; font-size: .95rem; letter-spacing: .02em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.editbar { background: var(--manga-bg); color: var(--manga-fg); border: 1px solid var(--manga-line); border-radius: 12px; padding: 8px 12px; margin: 4px 0 8px; font-size: .9rem; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.editbar b { font-weight: 700; }
+
+.tabsbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--bg);
+  margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding: 6px max(16px, env(safe-area-inset-right, 0px)) 6px max(16px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--line);
+  display: flex; gap: 8px; align-items: center;
+}
+.tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; flex: 1 1 auto; min-width: 0; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs a, .tabs button {
+  flex: 0 0 auto; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 14px; border-radius: 10px; background: var(--chip); color: var(--fg); text-decoration: none;
+  font: 700 1rem var(--font-body); position: relative; border: 0; cursor: pointer;
+}
+.tabs a[aria-current="page"] { background: var(--accent); color: var(--accent-ink); }
+.tabs a.now::after { content: ""; position: absolute; top: 5px; right: 5px; width: 9px; height: 9px; border-radius: 50%; background: var(--must); border: 2px solid var(--bg); }
+.tabs .addtab { background: transparent; border: 2px dashed var(--line); color: var(--accent); }
+
+.btn {
+  min-height: 44px; min-width: 44px; padding: 0 12px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--fg); border-radius: 10px; font: 700 .95rem var(--font-body); cursor: pointer;
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.danger { color: var(--danger); }
+.btn.danger.armed { background: var(--danger); color: var(--danger-ink); border-color: var(--danger); }
+.btn.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+#clock { font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+#clock.running { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btnrow { display: flex; gap: 6px; flex-wrap: wrap; }
+
+main { padding-block: 16px 0; max-width: 46rem; margin-inline: auto; }
+.eyebrow { font-weight: 700; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.eyebrow .time { margin-left: 8px; padding: 2px 8px; border-radius: 8px; background: var(--chip); color: var(--fg); letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: 1.7rem; line-height: 1.14; margin: 4px 0 14px; text-wrap: balance; }
+.lbl { font-weight: 700; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+.muted { color: var(--muted); }
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; padding: 16px; margin: 0 0 14px; }
+.empty p { margin: 0 0 10px; }
+
+/* Blocos de leitura */
+.ask { background: var(--accent); color: var(--accent-ink); border-radius: 14px; padding: 14px 16px; margin: 0 0 14px; }
+.ask .lbl { opacity: .85; }
+.ask p { margin: 0 0 6px; font-size: 1.25rem; font-weight: 700; line-height: 1.3; }
+.ask p:last-child, .say p:last-child { margin-bottom: 0; }
+.board { background: var(--board-bg); color: var(--board-fg); border-radius: 14px; padding: 12px 16px 14px; margin: 0 0 14px; border: 3px solid var(--line); }
+.board .lbl { color: var(--board-lbl); }
+.board pre { margin: 0; font: 600 1.05rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.say { background: var(--accent-soft); border-radius: 14px; padding: 14px 16px; margin: 0 0 14px; }
+.say .lbl { color: var(--accent); }
+.say p { margin: 0 0 6px; font-size: 1.1rem; font-weight: 700; line-height: 1.35; }
+.readbox { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 12px 16px 14px; margin: 0 0 14px; }
+.readbox.must { border-color: var(--must); }
+.readbox .lbl { color: var(--accent); }
+.readbox.must .lbl { color: var(--must); }
+.readbox .reftitle { font-size: 1rem; letter-spacing: 0; text-transform: none; margin-bottom: 6px; }
+.readbox .verse { font-size: 1.2rem; line-height: 1.45; white-space: pre-line; }
+.readbox .verse.none { color: var(--muted); font-size: 1rem; }
+.after > .lbl { color: var(--muted); }
+ol.steps { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; counter-reset: s; }
+ol.steps li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px 12px 56px; position: relative; min-width: 0; }
+ol.steps li::before { content: counter(s); position: absolute; left: 12px; top: 12px; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font: 800 1rem var(--font-display); }
+.t { font-weight: 700; display: block; }
+.sub { display: block; color: var(--muted); font-size: .92em; margin-top: 2px; white-space: pre-line; }
+.manga { background: var(--manga-bg); color: var(--manga-fg); border: 1px solid var(--manga-line); border-radius: 14px; padding: 12px 16px; margin: 0 0 14px; }
+.manga ul, .avoid ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+.avoid { padding: 4px 4px 0; color: var(--muted); font-size: .95em; margin: 0 0 14px; }
+.avoid .lbl { color: var(--warn); }
+.note { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; margin: 0 0 14px; white-space: pre-line; }
+.note .lbl { color: var(--muted); }
+
+button.ref {
+  appearance: none; border: 0; font: inherit; font-weight: 700; color: inherit;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+  padding: 4px 7px; margin: -4px -1px; border-radius: 8px; cursor: pointer; line-height: 1.2; white-space: nowrap;
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;
+}
+button.ref.must { color: var(--must); text-decoration-thickness: 2px; background: color-mix(in srgb, var(--must) 14%, transparent); }
+.ask button.ref { color: var(--accent-ink); }
+.board button.ref { color: var(--board-fg); }
+.manga button.ref { color: inherit; }
+.manga button.ref.must, .ask button.ref.must { color: var(--must); background: color-mix(in srgb, #fff 82%, transparent); }
+.t button.ref, .sub button.ref, .say button.ref, .note button.ref, .avoid button.ref { color: var(--accent); }
+
+/* Lista de aulas */
+.acard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 0 0 12px; }
+.acard-link { display: block; color: inherit; text-decoration: none; margin: 0 0 10px; min-height: 44px; }
+.acard .at { display: block; font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; line-height: 1.2; }
+.acard .as { display: block; color: var(--muted); }
+.acard .am { display: block; color: var(--accent); font-weight: 700; font-size: .85rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.homebar { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+
+/* Edicao */
+.card-ed { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin: 0 0 12px; }
+.card-ed > header { display: flex; align-items: center; gap: 8px; justify-content: space-between; flex-wrap: wrap; margin-bottom: 6px; }
+.tname { font-weight: 700; }
+.help { color: var(--muted); font-size: .85em; margin: 0 0 6px; }
+label.lb { display: block; font-weight: 700; font-size: .8rem; margin: 10px 0 4px; color: var(--muted); }
+input.f, textarea.f, select.f {
+  width: 100%; font: inherit; font-size: 1rem; color: var(--fg); background: var(--field);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 44px;
+}
+textarea.f { resize: none; line-height: 1.4; overflow: hidden; display: block; }
+textarea.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.addgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.step-ed { border-top: 1px dashed var(--line); padding: 10px 0 4px; display: grid; gap: 8px; }
+.step-ed:first-child { border-top: 0; padding-top: 0; }
+.rprev { margin-top: 8px; padding: 8px 10px; background: var(--chip); border-radius: 10px; font-size: .92em; white-space: pre-line; display: grid; gap: 8px; justify-items: start; }
+.chk { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 700; }
+.chk input { width: 24px; height: 24px; accent-color: var(--must); }
+.ok { color: var(--accent); font-weight: 700; }
+.bad { color: var(--warn); font-weight: 700; }
+
+/* Barra inferior */
+.nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 9; background: var(--bg); border-top: 1px solid var(--line);
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+body.typing .nav { display: none; }
+.nav a { min-height: 56px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); color: var(--fg); text-decoration: none; font-weight: 700; font-size: 1rem; line-height: 1.2; padding: 6px 10px; }
+.nav a.next { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.nav a[aria-disabled="true"] { visibility: hidden; }
+
+/* Pop-up do versiculo */
+.sheet-bg { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-end; justify-content: center; }
+.sheet {
+  background: var(--surface); color: var(--fg); width: 100%; max-width: 46rem; max-height: 80vh; max-height: 80dvh; overflow: auto;
+  border: 1px solid var(--line); border-radius: 18px 18px 0 0;
+  padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.sheet h3 { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; margin: 0; }
+.sheet h3.must { color: var(--must); }
+.sheet .body { font-size: calc(var(--fs) + 3px); line-height: 1.5; white-space: pre-line; }
+.sheet .src { color: var(--muted); font-size: .8rem; margin-top: 10px; }
+.sheet .act { margin-top: 12px; }
+
+/* PWA: base que o artefato recebia da plataforma */
+html { background: var(--bg); }
+html, body { margin: 0; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+img { max-width: 100%; }
+.sheet .body.panel { font-size: 1rem; white-space: normal; }
+summary.tname { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
+details.card-ed p { margin: 6px 0; }
+.homebar .btn { flex: 0 0 auto; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav class="nav" id="nav" aria-label="Navegar entre telas" hidden>
+  <a id="prev" href="#aulas">Anterior</a>
+  <a id="next" class="next" href="#aulas">Próxima</a>
+</nav>
+<div class="sheet-bg" id="sheet-bg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-head">
+      <h3 id="sheet-title"></h3>
+      <button type="button" class="btn" id="sheet-close">Fechar</button>
+    </div>
+    <div class="body" id="sheet-body"></div>
+    <div class="act" id="sheet-act"></div>
+    <div class="src" id="sheet-src"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================= Livros da Biblia ================= */
+  var BK = [
+    ['Gn','Gênesis','gen'],['Êx','Êxodo','ex','exo'],['Lv','Levítico','lev'],['Nm','Números','num'],['Dt','Deuteronômio','deut'],
+    ['Js','Josué'],['Jz','Juízes'],['Rt','Rute'],['1Sm','1 Samuel'],['2Sm','2 Samuel'],['1Rs','1 Reis'],['2Rs','2 Reis'],
+    ['1Cr','1 Crônicas'],['2Cr','2 Crônicas'],['Ed','Esdras'],['Ne','Neemias'],['Et','Ester'],['Jó','Jó','job'],
+    ['Sl','Salmo','salmos','sal'],['Pv','Provérbios','pr','prov'],['Ec','Eclesiastes','ecl'],['Ct','Cantares','canticos'],
+    ['Is','Isaías'],['Jr','Jeremias'],['Lm','Lamentações'],['Ez','Ezequiel'],['Dn','Daniel'],['Os','Oseias'],['Jl','Joel'],
+    ['Am','Amós'],['Ob','Obadias'],['Jn','Jonas'],['Mq','Miqueias'],['Na','Naum'],['Hc','Habacuque'],['Sf','Sofonias'],
+    ['Ag','Ageu'],['Zc','Zacarias'],['Ml','Malaquias'],
+    ['Mt','Mateus','mat'],['Mc','Marcos','mar'],['Lc','Lucas','luc'],['Jo','João'],['At','Atos'],['Rm','Romanos','rom'],
+    ['1Co','1 Coríntios'],['2Co','2 Coríntios'],['Gl','Gálatas','gal'],['Ef','Efésios','efe'],['Fp','Filipenses','fil'],
+    ['Cl','Colossenses','col'],['1Ts','1 Tessalonicenses'],['2Ts','2 Tessalonicenses'],['1Tm','1 Timóteo'],['2Tm','2 Timóteo'],
+    ['Tt','Tito'],['Fm','Filemom'],['Hb','Hebreus','heb'],['Tg','Tiago','tia'],['1Pe','1 Pedro'],['2Pe','2 Pedro'],
+    ['1Jo','1 João'],['2Jo','2 João'],['3Jo','3 João'],['Jd','Judas'],['Ap','Apocalipse','apoc']
+  ];
+  function nk(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[.\s]/g, '');
+  }
+  var MAP = {}, DISP = {};
+  BK.forEach(function (b) {
+    DISP[b[0]] = b[1];
+    var al = [b[1]].concat(b.slice(2));
+    if (b[0] !== 'Jó') al.push(b[0]);
+    al.forEach(function (x) { var k = nk(x); if (!(k in MAP)) MAP[k] = b[0]; });
+  });
+  /* grupos: 1 livro, 2 trecho todo, 3 capitulo, 4 separador (: . ,), 5 versiculo, 6 versiculo final. Sem quebra de linha entre livro e numero. */
+  var RXSRC = '(?:((?:[1-3][ \\t\\u00a0]?)?[A-Za-zÀ-ÿ]{1,14})\\.?[ \\t\\u00a0]*)?((\\d{1,3})([:.,])(\\d{1,3})(?:[ \\t]*[-–][ \\t]*(\\d{1,3}))?)';
+
+  function bookKey(a) { return MAP[nk(a && a.book)] || null; }
+  function parseRef(str, defKey) {
+    var m = new RegExp('^\\s*' + RXSRC + '\\s*$').exec(str || '');
+    if (!m) return null;
+    var key = m[1] ? MAP[nk(m[1])] : (m[4] === ':' ? defKey : null);
+    if (!key) return null;
+    var v1 = +m[5], v2 = m[6] ? +m[6] : v1;
+    if (v2 < v1) v2 = v1;
+    return { key: key, ch: +m[3], v1: v1, v2: v2 };
+  }
+  function refTitle(r) { return DISP[r.key] + ' ' + r.ch + ':' + r.v1 + (r.v2 > r.v1 ? '-' + r.v2 : ''); }
+
+  /* ================= Estado ================= */
+  var db = null, userNs = null, canWrite = true, dbReady = false, loadFailed = false, firstSnap = true;
+  var aulas = {}, lastJson = {}, dirty = {}, inflight = {}, savedAt = {}, timers = {}, retries = {};
+  var editing = false, pendingEdit = false, pendingRemote = false, focusVerse = null;
+  var route = { aula: null, sec: null };
+  var loadTimer = null, statusTxt = 'Salvo';
+  var pendingFit = [];
+
+  function uid() { return Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2, 6); }
+  function today() {
+    var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  function fmtDate(s) { var m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }
+
+  /* ================= DOM helpers ================= */
+  function add(el, c) {
+    if (c == null || c === false) return;
+    if (Array.isArray(c)) c.forEach(function (x) { add(el, x); });
+    else if (typeof c === 'string' || typeof c === 'number') el.appendChild(document.createTextNode(String(c)));
+    else el.appendChild(c);
+  }
+  function h(tag, p) {
+    var el = document.createElement(tag);
+    if (p) for (var k in p) {
+      var v = p[k];
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k === 'value') el.value = v;
+      else if (k.slice(0, 2) === 'on') el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (var i = 2; i < arguments.length; i++) add(el, arguments[i]);
+    return el;
+  }
+  function txt(s) { return document.createTextNode(s); }
+  function fit(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight + 2) + 'px'; }
+  function flushFit() { requestAnimationFrame(function () { pendingFit.splice(0).forEach(function (e) { if (e.isConnected) fit(e); }); }); }
+  function inp(value, onInput, attrs) {
+    var p = { class: 'f', type: 'text' };
+    if (attrs) for (var k in attrs) p[k] = attrs[k];
+    var el = h('input', p);
+    el.value = value || '';
+    el.addEventListener('input', function () { onInput(el.value); });
+    return el;
+  }
+  function area(value, onInput, o) {
+    o = o || {};
+    var el = h('textarea', { class: 'f' + (o.mono ? ' mono' : ''), rows: o.rows || 3, placeholder: o.ph || '' });
+    el.value = value || '';
+    el.addEventListener('input', function () { onInput(el.value); fit(el); });
+    pendingFit.push(el);
+    return el;
+  }
+  function btn(label, onClick, cls, aria) {
+    return h('button', { type: 'button', class: 'btn' + (cls ? ' ' + cls : ''), onclick: onClick, 'aria-label': aria || null, text: label });
+  }
+  function confirmBtn(label, onYes) {
+    var armed = false, t;
+    var b = h('button', { type: 'button', class: 'btn danger', text: label });
+    b.addEventListener('click', function () {
+      if (!armed) {
+        armed = true; b.textContent = 'Tem certeza?'; b.classList.add('armed');
+        t = setTimeout(function () { armed = false; b.textContent = label; b.classList.remove('armed'); }, 4000);
+      } else { clearTimeout(t); onYes(); }
+    });
+    return b;
+  }
+  function field(label, el) { return [h('label', { class: 'lb', text: label }), el]; }
+  function move(arr, i, d) {
+    var j = i + d; if (j < 0 || j >= arr.length) return false;
+    var x = arr[i]; arr[i] = arr[j]; arr[j] = x; return true;
+  }
+
+  /* ================= Modelo de dados ================= */
+  var BT = {
+    ask:   { name: 'Pergunta para a turma', help: 'Pergunta de posição ("quem concorda?") ou de exemplo ("me dá uma situação em que..."). Evite pedir para procurar no texto.' },
+    board: { name: 'No quadro', help: 'Exatamente o que vai escrito no quadro. Use colunas simples e linhas curtas.' },
+    say:   { name: 'O que falar', help: 'A ponte entre a vida da turma e o texto bíblico, em uma ou duas frases.' },
+    read:  { name: 'Versículo para ler', help: 'Digite só a referência. O texto vem da aba Versículos.' },
+    steps: { name: 'Depois que reagirem', help: 'Pontos que você apresenta depois que a turma falar. Cada ponto pode citar versículos (ex.: Rm 3:23) e eles viram toque para abrir.' },
+    manga: { name: 'Deixar na manga', help: 'Ideias ou versículos extras, só se a conversa pedir. Um por linha.' },
+    avoid: { name: 'Evite', help: 'Cuidados e erros comuns nesta parte. Um por linha.' },
+    note:  { name: 'Anotação', help: 'Qualquer anotação livre para você.' }
+  };
+  var TYPES = ['ask', 'board', 'say', 'read', 'steps', 'manga', 'avoid', 'note'];
+
+  function newBlock(type) { return { id: uid(), type: type, text: '', ref: '', items: type === 'steps' ? [{ t: '', s: '' }] : [] }; }
+  function newSec(label, title, start, end, types) {
+    return { id: uid(), label: label, title: title, start: start, end: end, blocks: (types || []).map(newBlock) };
+  }
+  function blankAula(id) {
+    return {
+      id: id, title: 'Nova aula', subtitle: '', date: today(), book: '', createdAt: Date.now(), updatedAt: Date.now(),
+      sections: [
+        newSec('Abertura', 'Situação do dia a dia', 0, 10, ['say', 'ask', 'board']),
+        newSec('1', 'Bloco 1', 10, 30, ['ask', 'board', 'say', 'read', 'steps']),
+        newSec('2', 'Bloco 2', 30, 50, ['ask', 'board', 'say', 'steps']),
+        newSec('Fechar', 'Silêncio e oração', 50, 60, ['board', 'steps'])
+      ],
+      verses: []
+    };
+  }
+  function exampleAula(id) {
+    function B(type, o) { var b = newBlock(type); for (var k in o) b[k] = o[k]; return b; }
+    var s0 = newSec('Abertura', 'Uma nota que ninguém alcança', 0, 10, []);
+    s0.blocks = [
+      B('say', { text: 'Imagine uma prova em que a nota de corte é 100. Ninguém da sala tira 100.' }),
+      B('ask', { text: 'Quem concorda que existe uma "nota de corte" que a gente não alcança sozinho? Me dá um exemplo do dia a dia em que só se esforçar não bastou.' }),
+      B('board', { text: 'NOTA DE CORTE: 100\n\nO que a gente tenta usar:\n(escrever o que a turma disser)' })
+    ];
+    var s1 = newSec('1', 'Todos ficam aquém', 10, 30, []);
+    s1.blocks = [
+      B('ask', { text: 'Quem acha que as pessoas "boas" não precisam de ajuda de Deus? Por quê?' }),
+      B('say', { text: 'Vamos ver o que a Bíblia diz sobre isso, e comparar com o que vocês acabaram de falar.' }),
+      B('read', { ref: 'Rm 3:23' }),
+      B('steps', { items: [
+        { t: 'O texto não deixa ninguém de fora', s: 'Retomar os exemplos do quadro: nenhum deles chegou aos 100.' },
+        { t: 'Por isso precisamos de graça', s: 'Volte ao quadro e compare com Rm 3:23. Toque na referência para abrir o versículo.' }
+      ] }),
+      B('manga', { text: 'Se perguntarem: a graça não é desculpa para pecar.' })
+    ];
+    var s2 = newSec('Fechar', 'Silêncio e oração', 30, 40, []);
+    s2.blocks = [
+      B('board', { text: 'TODOS FICAM AQUÉM\nPRECISAMOS DE GRAÇA' }),
+      B('steps', { items: [
+        { t: 'Um minuto de silêncio', s: 'Cada um pensa: onde eu tento "chegar aos 100" sozinho?' },
+        { t: 'Oração', s: 'O professor ou um voluntário.' }
+      ] })
+    ];
+    return {
+      id: id, title: 'Exemplo: como montar uma aula', subtitle: 'Aula de exemplo. Toque em Editar para ver como é feita.', date: today(),
+      book: 'Romanos', createdAt: Date.now(), updatedAt: Date.now(), sections: [s0, s1, s2],
+      verses: [{ id: uid(), ref: 'Rm 3:23', text: 'Porque todos pecaram e destituídos estão da glória de Deus;', must: true }]
+    };
+  }
+
+  /* ================= Versiculos ================= */
+  function verseIndex(a) {
+    var dk = bookKey(a);
+    return (a.verses || []).map(function (v) { var r = parseRef(v.ref, dk); return r ? { r: r, v: v } : null; }).filter(Boolean);
+  }
+  function lookup(a, r) {
+    var idx = verseIndex(a), must = false, text = null;
+    idx.forEach(function (e) {
+      if (e.r.key === r.key && e.r.ch === r.ch && e.r.v1 <= r.v2 && e.r.v2 >= r.v1 && e.v.must) must = true;
+    });
+    var ex = idx.filter(function (e) {
+      return e.r.key === r.key && e.r.ch === r.ch && e.r.v1 === r.v1 && e.r.v2 === r.v2 && e.v.text && e.v.text.trim();
+    })[0];
+    if (ex) text = ex.v.text.trim();
+    else {
+      var parts = [], ok = true;
+      for (var n = r.v1; n <= r.v2 && ok; n++) {
+        var c = idx.filter(function (e) {
+          return e.r.key === r.key && e.r.ch === r.ch && e.r.v1 <= n && e.r.v2 >= n && e.v.text && e.v.text.trim();
+        })[0];
+        if (!c) ok = false; else if (parts.indexOf(c.v.text.trim()) < 0) parts.push(c.v.text.trim());
+      }
+      if (ok) text = parts.join('\n');
+    }
+    return { text: text, must: must };
+  }
+
+  function linkify(a, text) {
+    var frag = document.createDocumentFragment(), s = String(text || ''), last = 0, m, ctx = null;
+    var rx = new RegExp(RXSRC, 'g');
+    while ((m = rx.exec(s))) {
+      var lead = m[0].slice(0, m[0].length - m[2].length);
+      var bk = m[1] ? MAP[nk(m[1])] : null;
+      var startAt, shown, key, explicit;
+      if (bk) { startAt = m.index; shown = m[0]; key = bk; ctx = bk; explicit = true; }
+      else { startAt = m.index + lead.length; shown = m[2]; key = ctx || bookKey(a); explicit = !!ctx; }
+      if (!bk && m[4] !== ':') continue;
+      var r = key ? { key: key, ch: +m[3], v1: +m[5], v2: m[6] ? Math.max(+m[6], +m[5]) : +m[5] } : null;
+      if (startAt > last) frag.appendChild(txt(s.slice(last, startAt)));
+      var ok = false;
+      if (r) { ok = explicit; if (!ok) { var inf = lookup(a, r); ok = !!inf.text; } }
+      frag.appendChild(ok ? refButton(a, r, shown) : txt(shown));
+      last = startAt + shown.length;
+    }
+    if (last < s.length) frag.appendChild(txt(s.slice(last)));
+    return frag;
+  }
+  function refButton(a, r, label) {
+    var must = lookup(a, r).must;
+    return h('button', { type: 'button', class: 'ref' + (must ? ' must' : ''), 'aria-label': 'Ler ' + refTitle(r), onclick: function () { openSheet(a, r); }, text: label });
+  }
+  function para(a, text, tag) {
+    return String(text || '').split('\n').filter(function (l) { return l.trim(); }).map(function (l) {
+      var el = document.createElement(tag || 'p'); el.appendChild(linkify(a, l)); return el;
+    });
+  }
+
+  /* ---- pop-up ---- */
+  var bg = document.getElementById('sheet-bg'), sTitle = document.getElementById('sheet-title'),
+      sBody = document.getElementById('sheet-body'), sAct = document.getElementById('sheet-act'),
+      sSrc = document.getElementById('sheet-src'), sClose = document.getElementById('sheet-close'), lastFocus = null;
+  function openSheet(a, r) {
+    lastFocus = document.activeElement;
+    sBody.className = 'body';
+    var info = lookup(a, r);
+    sTitle.textContent = refTitle(r); sTitle.className = info.must ? 'must' : '';
+    sAct.textContent = '';
+    if (info.text) { sBody.textContent = info.text; sSrc.textContent = 'Texto cadastrado nesta aula. Pode diferir da Bíblia da turma em algumas palavras.'; }
+    else {
+      sBody.textContent = 'O texto deste versículo ainda não foi cadastrado nesta aula. Abra na Bíblia: ' + refTitle(r) + '.';
+      sSrc.textContent = '';
+      if (editing && canWrite) sAct.appendChild(btn('Cadastrar este texto', function () { closeSheet(); addVerse(a, refTitle(r)); }, 'primary'));
+    }
+    bg.hidden = false; document.body.classList.add('locked'); sBody.parentNode.scrollTop = 0; sClose.focus();
+  }
+  function closeSheet() {
+    bg.hidden = true; document.body.classList.remove('locked');
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
+  }
+  sClose.addEventListener('click', closeSheet);
+  bg.addEventListener('click', function (e) { if (e.target === bg) closeSheet(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !bg.hidden) closeSheet(); });
+
+  /* ================= Salvar ================= */
+  function lsSave() { try { localStorage.setItem('aulas-backup', JSON.stringify(aulas)); return true; } catch (e) { return false; } }
+  function lsLoad() { try { var s = localStorage.getItem('aulas-backup'); if (s) aulas = JSON.parse(s) || {}; } catch (e) {} }
+  function setStatus(t) {
+    statusTxt = t;
+    var el = document.getElementById('status'); if (el) el.textContent = t;
+  }
+  function touch(id) {
+    var a = aulas[id]; if (!a) return;
+    a.updatedAt = Date.now(); dirty[id] = true; retries[id] = 0;
+    setStatus('Salvando…');
+    clearTimeout(timers[id]);
+    timers[id] = setTimeout(function () { flush(id); }, 700);
+  }
+  function flush(id) {
+    if (inflight[id]) { timers[id] = setTimeout(function () { flush(id); }, 400); return; }
+    var a = aulas[id]; if (!a) { delete dirty[id]; return; }
+    var j = JSON.stringify(a);
+    inflight[id] = true;
+    var p = db ? db.collection('aulas').doc(id).set(JSON.parse(j)) : Promise.resolve();
+    p.then(function () {
+      inflight[id] = false; lastJson[id] = j; savedAt[id] = Date.now(); var stored = lsSave();
+      if (JSON.stringify(aulas[id]) === j) { delete dirty[id]; setStatus(!stored ? 'Não foi possível guardar neste aparelho. Use Exportar.' : (db ? 'Salvo' : 'Salvo neste aparelho')); }
+      else timers[id] = setTimeout(function () { flush(id); }, 300);
+    }).catch(function (e) {
+      inflight[id] = false;
+      if (e && (e.code === 'invalid_argument' || e.code === 'revoked')) {
+        canWrite = false; editing = false; delete dirty[id];
+        setStatus('Você só pode ler esta aula'); renderKeep(); return;
+      }
+      retries[id] = (retries[id] || 0) + 1;
+      if (retries[id] <= 3) { setStatus('Não salvou. Tentando de novo…'); timers[id] = setTimeout(function () { flush(id); }, 3000); }
+      else setStatus('Não foi possível salvar. Confira a internet e edite de novo.');
+    });
+  }
+  function removeAula(id) {
+    delete aulas[id]; delete dirty[id]; delete lastJson[id]; clearTimeout(timers[id]);
+    lsSave();
+    if (db) db.collection('aulas').doc(id).delete().catch(function () { setStatus('Não foi possível excluir. Tente de novo.'); });
+    if (route.aula === id) location.hash = '#aulas'; else renderKeep();
+  }
+  function applySnap(snap) {
+    dbReady = true; loadFailed = false; clearTimeout(loadTimer);
+    var seen = {}, changed = false;
+    snap.docs.forEach(function (d) {
+      var v = d.data(); if (!v || !v.id) return;
+      seen[d.id] = 1;
+      if (dirty[d.id] || inflight[d.id]) return;
+      var j = JSON.stringify(v);
+      if (lastJson[d.id] !== j) { aulas[d.id] = JSON.parse(j); lastJson[d.id] = j; changed = true; }
+    });
+    if (!snap.metadata.fromCache) {
+      Object.keys(aulas).forEach(function (id) {
+        if (!seen[id] && !dirty[id] && !inflight[id] && lastJson[id] && Date.now() - (savedAt[id] || 0) > 10000) {
+          delete aulas[id]; delete lastJson[id]; changed = true;
+        }
+      });
+    }
+    if (changed || firstSnap) {
+      firstSnap = false;
+      if (isTyping()) pendingRemote = true; else renderKeep();
+    }
+  }
+  function isTyping() {
+    var el = document.activeElement;
+    return !!(editing && el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'));
+  }
+
+  /* ================= Rotas ================= */
+  function parseHash() {
+    var s = (location.hash || '').slice(1);
+    var m = /^a-([a-z0-9]+)-([a-z0-9]+)$/.exec(s);
+    if (m) return { aula: m[1], sec: m[2] };
+    m = /^a-([a-z0-9]+)$/.exec(s);
+    return m ? { aula: m[1], sec: null } : { aula: null, sec: null };
+  }
+  function go(id, sec) {
+    var t = '#a-' + id + (sec ? '-' + sec : '');
+    if (location.hash === t) onRoute(); else location.hash = t;
+  }
+  function onRoute() {
+    var prev = route.aula;
+    route = parseHash();
+    if (route.aula !== prev && !pendingEdit) editing = false;
+    pendingEdit = false;
+    render(); window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', onRoute);
+  function renderKeep() { var y = window.scrollY; render(); window.scrollTo(0, y); }
+
+  /* ================= Telas ================= */
+  var fs = 18;
+  try { var sv = parseInt(localStorage.getItem('roteiro-fs'), 10); if (sv >= 15 && sv <= 28) fs = sv; } catch (e) {}
+  function applyFs() { document.documentElement.style.setProperty('--fs', fs + 'px'); try { localStorage.setItem('roteiro-fs', String(fs)); } catch (e) {} }
+  applyFs();
+
+  /* Tema: Auto segue o aparelho; Claro e Escuro forçam. A escolha fica lembrada. */
+  var THEME = 'auto';
+  try { var tv = localStorage.getItem('roteiro-tema'); if (tv === 'light' || tv === 'dark') THEME = tv; } catch (e) {}
+  function applyTheme() {
+    var r = document.documentElement;
+    if (THEME === 'auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', THEME);
+    try { localStorage.setItem('roteiro-tema', THEME); } catch (e) {}
+  }
+  applyTheme();
+  function themeLabel() { return THEME === 'light' ? '☀ Claro' : THEME === 'dark' ? '☾ Escuro' : '◐ Auto'; }
+  function themeBtn() {
+    var b = h('button', { type: 'button', class: 'btn', 'aria-label': 'Mudar tema: automático, claro ou escuro', text: themeLabel() });
+    b.addEventListener('click', function () {
+      THEME = THEME === 'auto' ? 'light' : THEME === 'light' ? 'dark' : 'auto';
+      applyTheme(); b.textContent = themeLabel();
+    });
+    return b;
+  }
+  function showFatal(e) {
+    try {
+      app.textContent = ''; navEl.hidden = true;
+      app.appendChild(h('main', null,
+        h('h1', { text: 'Algo deu errado ao montar a tela' }),
+        h('div', { class: 'empty' },
+          h('p', { text: 'Os dados não foram apagados. Tente de novo ou mude o tema.' }),
+          h('p', { class: 'muted', text: String(e && e.message ? e.message : e) }),
+          h('div', { class: 'btnrow' },
+            btn('Tentar de novo', function () { try { location.hash = '#aulas'; route = parseHash(); render(); } catch (x) { location.reload(); } }, 'primary'),
+            themeBtn()))));
+    } catch (x) {}
+  }
+  window.addEventListener('error', function (ev) { if (!app.firstChild) showFatal(ev && ev.error ? ev.error : (ev && ev.message)); });
+
+  function sizeTools(extra) {
+    return h('div', { class: 'tools' },
+      themeBtn(),
+      btn('A−', function () { if (fs > 15) { fs -= 2; applyFs(); } }, '', 'Diminuir texto'),
+      btn('A+', function () { if (fs < 28) { fs += 2; applyFs(); } }, '', 'Aumentar texto'),
+      extra || null);
+  }
+
+  var app = document.getElementById('app'), navEl = document.getElementById('nav');
+  function render() {
+    try {
+      app.textContent = ''; pendingFit = [];
+      navEl.hidden = true;
+      if (route.aula) renderAula(); else renderHome();
+      flushFit(); tick();
+    } catch (e) { showFatal(e); }
+  }
+
+  /* ---- lista de aulas ---- */
+  function renderHome() {
+    app.appendChild(h('header', { class: 'top' }, h('div', { class: 'top-row' }, h('span', { class: 'brand', text: 'Roteiro das aulas' }), sizeTools())));
+    var main = h('main', null, h('div', { class: 'eyebrow', text: 'Aulas' }), h('h1', { text: 'Minhas aulas' }));
+    app.appendChild(main);
+    if (!dbReady) {
+      main.appendChild(h('div', { class: 'empty' }, h('p', { text: loadFailed ? 'Não consegui carregar as aulas salvas. Pode ser a internet. A lista aparece sozinha assim que a conexão voltar.' : 'Carregando aulas…' })));
+      return;
+    }
+    var list = Object.keys(aulas).map(function (k) { return aulas[k]; }).sort(function (x, y) {
+      return (y.date || '').localeCompare(x.date || '') || (y.createdAt || 0) - (x.createdAt || 0);
+    });
+    if (canWrite) main.appendChild(h('div', { class: 'homebar' },
+      btn('+ Nova aula', function () { newAula('blank'); }, 'primary'),
+      btn('Importar aula', showImport),
+      list.length ? btn('Exportar todas', function () { showExport(list); }) : null));
+    if (!list.length) {
+      main.appendChild(h('div', { class: 'empty' },
+        h('p', { text: canWrite ? 'Nenhuma aula ainda. Crie uma aula em branco ou veja uma aula de exemplo já preenchida.' : 'Nenhuma aula ainda.' }),
+        canWrite ? btn('Ver aula de exemplo', function () { newAula('example'); }) : null));
+    }
+    list.forEach(function (a) {
+      var n = a.sections.length, meta = [fmtDate(a.date), n + (n === 1 ? ' tela' : ' telas')].filter(Boolean).join(' · ');
+      main.appendChild(h('article', { class: 'acard' },
+        h('a', { class: 'acard-link', href: '#a-' + a.id },
+          h('span', { class: 'at', text: a.title || 'Aula sem título' }),
+          a.subtitle ? h('span', { class: 'as', text: a.subtitle }) : null,
+          h('span', { class: 'am', text: meta })),
+        canWrite ? h('div', { class: 'btnrow' }, btn('Duplicar', function () { dupAula(a.id); }), btn('Exportar', function () { showExport([a]); }), confirmBtn('Excluir', function () { removeAula(a.id); })) : null));
+    });
+    main.appendChild(h('p', { class: 'muted', text: 'As aulas ficam salvas só neste aparelho. Use Exportar para mandar a outro professor ou para guardar uma cópia.' }));
+    if (!isStandalone()) main.appendChild(h('details', { class: 'card-ed' },
+      h('summary', { class: 'tname', text: 'Como instalar no celular' }),
+      h('p', null, h('b', { text: 'iPhone: ' }), 'abra este endereço no Safari, toque no botão Compartilhar (quadrado com seta) e escolha "Adicionar à Tela de Início".'),
+      h('p', null, h('b', { text: 'Android: ' }), 'abra no Chrome, toque nos três pontos e escolha "Instalar app" ou "Adicionar à tela inicial".'),
+      h('p', { class: 'muted', text: 'Depois de instalado, abre em tela cheia e funciona sem internet.' })));
+    if (!canWrite) main.appendChild(h('p', { class: 'muted', text: 'Você pode ver as aulas, mas não editar.' }));
+  }
+  /* ---- instalar, exportar e importar ---- */
+  function isStandalone() {
+    try { return window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); } catch (e) { return false; }
+  }
+  var MARK = '[[roteiro-aulas]]';
+  function exportText(list) { return MARK + JSON.stringify({ app: 'roteiro-aulas', v: 1, aulas: list }); }
+  function fileName(list) {
+    var t = list.length === 1 ? (list[0].title || 'aula') : 'aulas';
+    return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'aula';
+  }
+  function copyText(s, done) {
+    function fallback() {
+      var ta = document.createElement('textarea'); ta.value = s; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta); done(ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(s).then(function () { done(true); }, fallback);
+    else fallback();
+  }
+  function downloadFile(s, name) {
+    var url = URL.createObjectURL(new Blob([s], { type: 'text/plain' }));
+    var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+  }
+  function openPanel(title, nodes) {
+    lastFocus = document.activeElement;
+    sTitle.textContent = title; sTitle.className = '';
+    sBody.className = 'body panel'; sBody.textContent = ''; add(sBody, nodes);
+    sAct.textContent = ''; sSrc.textContent = '';
+    bg.hidden = false; document.body.classList.add('locked'); sBody.parentNode.scrollTop = 0; sClose.focus();
+  }
+  function showExport(list) {
+    var text = exportText(list), name = fileName(list), msg = h('p', { class: 'help' });
+    openPanel(list.length === 1 ? 'Exportar aula' : 'Exportar ' + list.length + ' aulas', [
+      h('p', { class: 'help', text: 'Mande para outro professor pelo WhatsApp. Quem receber toca em "Importar aula" e cola o texto ou escolhe o arquivo.' }),
+      h('div', { class: 'btnrow' },
+        btn('Copiar texto', function () { copyText(text, function (ok) { msg.className = ok ? 'ok' : 'bad'; msg.textContent = ok ? 'Texto copiado. Cole numa conversa.' : 'Não consegui copiar. Use "Baixar arquivo".'; }); }, 'primary'),
+        navigator.share ? btn('Compartilhar', function () { navigator.share({ title: 'Roteiro de aula', text: text }).catch(function () {}); }) : null,
+        btn('Baixar arquivo', function () { downloadFile(text, name + '.txt'); msg.className = 'ok'; msg.textContent = 'Arquivo gerado.'; })),
+      msg
+    ]);
+  }
+  function cleanAula(a) {
+    var c = JSON.parse(JSON.stringify(a)), id = uid();
+    c.id = id; c.createdAt = Date.now(); c.updatedAt = Date.now();
+    c.title = String(c.title || 'Aula importada'); c.subtitle = String(c.subtitle || ''); c.book = String(c.book || '');
+    c.date = /^\d{4}-\d\d-\d\d$/.test(c.date || '') ? c.date : today();
+    c.verses = (Array.isArray(c.verses) ? c.verses : []).filter(function (v) { return v && typeof v === 'object'; }).map(function (v) {
+      return { id: /^[a-z0-9]+$/.test(v.id || '') ? v.id : uid(), ref: String(v.ref || ''), text: String(v.text || ''), must: !!v.must };
+    });
+    c.sections = c.sections.filter(function (x) { return x && typeof x === 'object'; }).map(function (x) {
+      return {
+        id: /^[a-z0-9]+$/.test(x.id || '') ? x.id : uid(), label: String(x.label || ''), title: String(x.title || ''),
+        start: typeof x.start === 'number' ? x.start : null, end: typeof x.end === 'number' ? x.end : null,
+        blocks: (Array.isArray(x.blocks) ? x.blocks : []).filter(function (b) { return b && BT[b.type]; }).map(function (b) {
+          return {
+            id: /^[a-z0-9]+$/.test(b.id || '') ? b.id : uid(), type: b.type, text: String(b.text || ''), ref: String(b.ref || ''),
+            items: (Array.isArray(b.items) ? b.items : []).filter(Boolean).map(function (it) { return { t: String(it.t || ''), s: String(it.s || '') }; })
+          };
+        })
+      };
+    });
+    return c;
+  }
+  function importText(s) {
+    var i = s.indexOf('{'), j = s.lastIndexOf('}');
+    if (i < 0 || j <= i) return 0;
+    var data; try { data = JSON.parse(s.slice(i, j + 1)); } catch (e) { return 0; }
+    var list = Array.isArray(data.aulas) ? data.aulas : (data.aula ? [data.aula] : []), n = 0;
+    list.forEach(function (a) {
+      if (!a || typeof a !== 'object' || !Array.isArray(a.sections)) return;
+      var c = cleanAula(a); aulas[c.id] = c; touch(c.id); n++;
+    });
+    return n;
+  }
+  function showImport() {
+    var ta = h('textarea', { class: 'f', rows: 5, placeholder: 'Cole aqui o texto da aula' }), msg = h('p', { class: 'help' });
+    var file = h('input', { type: 'file', class: 'f', accept: '.txt,.json,text/plain,application/json' });
+    function run(s) {
+      var n = importText(s);
+      msg.className = n ? 'ok' : 'bad';
+      msg.textContent = n ? n + (n === 1 ? ' aula importada.' : ' aulas importadas.') : 'Não encontrei uma aula nesse texto.';
+      if (n) setTimeout(function () { closeSheet(); renderKeep(); }, 700);
+    }
+    file.addEventListener('change', function () {
+      var f = file.files && file.files[0]; if (!f) return;
+      var r = new FileReader(); r.onload = function () { run(String(r.result)); }; r.readAsText(f);
+    });
+    openPanel('Importar aula', [
+      field('Texto da aula', ta), btn('Importar texto', function () { run(ta.value); }, 'primary'),
+      field('Ou escolha um arquivo', file), msg
+    ]);
+  }
+
+  function newAula(kind) {
+    var id = uid(), a = kind === 'example' ? exampleAula(id) : blankAula(id);
+    aulas[id] = a; touch(id);
+    if (kind === 'example') { pendingEdit = false; go(id, a.sections[0].id); }
+    else { pendingEdit = true; editing = true; go(id, 'dados'); }
+  }
+  function dupAula(id) {
+    var src = aulas[id]; if (!src) return;
+    var c = JSON.parse(JSON.stringify(src)), nid = uid();
+    c.id = nid; c.title = (src.title || 'Aula') + ' (cópia)'; c.createdAt = Date.now();
+    aulas[nid] = c; touch(nid); renderKeep();
+  }
+
+  /* ---- uma aula ---- */
+  function panesOf(a) {
+    var p = a.sections.map(function (s) { return { id: s.id, label: s.label || '?', sec: s }; });
+    p.push({ id: 'versos', label: 'Versículos' });
+    if (editing) p.push({ id: 'dados', label: 'Dados' });
+    return p;
+  }
+  function renderAula() {
+    var a = aulas[route.aula];
+    if (!dbReady) { app.appendChild(h('main', null, h('div', { class: 'empty' }, h('p', { text: 'Carregando aula…' })))); return; }
+    if (!a) {
+      app.appendChild(h('main', null, h('h1', { text: 'Aula não encontrada' }), h('a', { class: 'back', href: '#aulas', text: '← Voltar às aulas' })));
+      return;
+    }
+    var panes = panesOf(a), cur = panes.filter(function (p) { return p.id === route.sec; })[0] || panes[0];
+
+    app.appendChild(h('header', { class: 'top' },
+      h('div', { class: 'top-row' },
+        h('a', { class: 'back', href: '#aulas', text: '← Aulas' }),
+        sizeTools(canWrite ? btn(editing ? 'Pronto' : 'Editar', function () {
+          editing = !editing;
+          if (!editing && route.sec === 'dados') { go(a.id, a.sections[0] ? a.sections[0].id : 'versos'); } else renderKeep();
+        }, editing ? 'on' : '') : null)),
+      h('div', { class: 'aula-name', text: a.title || 'Aula sem título' }),
+      editing ? h('div', { class: 'editbar' }, h('span', null, h('b', { text: 'Modo edição. ' }), 'Tudo salva sozinho.'), h('span', { id: 'status', text: statusTxt })) : null));
+
+    var tabs = h('nav', { class: 'tabs', 'aria-label': 'Telas da aula' });
+    panes.forEach(function (p) {
+      tabs.appendChild(h('a', {
+        href: '#a-' + a.id + '-' + p.id, id: 'tab-' + p.id, 'data-sec': p.id,
+        'aria-current': p.id === cur.id ? 'page' : null, text: p.label
+      }));
+    });
+    if (editing) tabs.appendChild(h('button', { type: 'button', class: 'addtab', 'aria-label': 'Adicionar tela', text: '+ Tela', onclick: function () { addSection(a); } }));
+    var clock = h('button', { type: 'button', class: 'btn', id: 'clock', text: '▶ Iniciar', 'aria-label': 'Relógio da aula', onclick: function () { toggleClock(a); } });
+    app.appendChild(h('div', { class: 'tabsbar' }, clock, tabs));
+
+    var main = h('main');
+    app.appendChild(main);
+    if (cur.id === 'versos') versosPane(a, main);
+    else if (cur.id === 'dados') dadosPane(a, main);
+    else if (editing) secEdit(a, cur.sec, main);
+    else secView(a, cur.sec, main);
+
+    var i = panes.indexOf(cur), prev = document.getElementById('prev'), next = document.getElementById('next');
+    navEl.hidden = false;
+    if (i > 0) { prev.href = '#a-' + a.id + '-' + panes[i - 1].id; prev.textContent = '← ' + panes[i - 1].label; prev.removeAttribute('aria-disabled'); }
+    else { prev.setAttribute('aria-disabled', 'true'); prev.removeAttribute('href'); }
+    if (i < panes.length - 1) { next.href = '#a-' + a.id + '-' + panes[i + 1].id; next.textContent = panes[i + 1].label + ' →'; next.removeAttribute('aria-disabled'); }
+    else { next.setAttribute('aria-disabled', 'true'); next.removeAttribute('href'); }
+    var t = document.getElementById('tab-' + cur.id);
+    if (t) { try { t.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) {} }
+  }
+
+  /* ---- leitura de uma tela ---- */
+  function timeLabel(s) { return (s.start != null && s.end != null) ? s.start + '–' + s.end + ' min' : ''; }
+  function secView(a, s, main) {
+    var eb = h('div', { class: 'eyebrow' }, s.label || 'Tela');
+    if (timeLabel(s)) eb.appendChild(h('span', { class: 'time', text: timeLabel(s) }));
+    main.appendChild(eb);
+    main.appendChild(h('h1', { text: s.title || s.label || 'Tela' }));
+    var any = false;
+    s.blocks.forEach(function (b) { var el = blockView(a, b); if (el) { main.appendChild(el); any = true; } });
+    if (!any) main.appendChild(h('div', { class: 'empty' }, h('p', { text: 'Esta tela ainda está vazia.' }), canWrite ? btn('Editar esta tela', function () { editing = true; renderKeep(); }) : null));
+  }
+  function blockView(a, b) {
+    var t = b.text || '';
+    if (b.type === 'ask' && t.trim()) return h('div', { class: 'ask' }, h('span', { class: 'lbl', text: 'Lançar à turma' }), para(a, t));
+    if (b.type === 'board' && t.trim()) return h('div', { class: 'board' }, h('span', { class: 'lbl', text: 'No quadro' }), h('pre', { text: t }));
+    if (b.type === 'say' && t.trim()) return h('div', { class: 'say' }, h('span', { class: 'lbl', text: 'Falar' }), para(a, t));
+    if (b.type === 'note' && t.trim()) return h('div', { class: 'note' }, h('span', { class: 'lbl', text: 'Anotação' }), linkify(a, t));
+    if (b.type === 'manga' && t.trim()) return h('div', { class: 'manga' }, h('span', { class: 'lbl', text: 'Deixar na manga' }), h('ul', null, para(a, t, 'li')));
+    if (b.type === 'avoid' && t.trim()) return h('div', { class: 'avoid' }, h('span', { class: 'lbl', text: 'Evite' }), h('ul', null, para(a, t, 'li')));
+    if (b.type === 'read' && (b.ref || '').trim()) {
+      var r = parseRef(b.ref, bookKey(a));
+      if (!r) return h('div', { class: 'readbox' }, h('span', { class: 'lbl reftitle', text: b.ref }), h('div', { class: 'verse none', text: 'Abra na Bíblia: ' + b.ref + '.' }));
+      var info = lookup(a, r);
+      return h('div', { class: 'readbox' + (info.must ? ' must' : '') }, h('span', { class: 'lbl reftitle', text: 'Ler em voz alta · ' + refTitle(r) }),
+        h('div', { class: 'verse' + (info.text ? '' : ' none'), text: info.text || 'Texto ainda não cadastrado. Abra na Bíblia: ' + refTitle(r) + '.' }));
+    }
+    if (b.type === 'steps') {
+      var items = (b.items || []).filter(function (it) { return (it.t || '').trim() || (it.s || '').trim(); });
+      if (!items.length) return null;
+      var ol = h('ol', { class: 'steps' });
+      items.forEach(function (it) {
+        var li = h('li');
+        if ((it.t || '').trim()) { var tt = h('span', { class: 't' }); tt.appendChild(linkify(a, it.t)); li.appendChild(tt); }
+        if ((it.s || '').trim()) { var ss = h('span', { class: 'sub' }); ss.appendChild(linkify(a, it.s)); li.appendChild(ss); }
+        ol.appendChild(li);
+      });
+      return h('div', { class: 'after' }, h('span', { class: 'lbl', text: 'Depois que reagirem' }), ol);
+    }
+    return null;
+  }
+
+  /* ---- edicao de uma tela ---- */
+  function numAttr(v) { return v == null ? '' : String(v); }
+  function toNum(v) { var n = parseInt(String(v).replace(/\D/g, ''), 10); return isNaN(n) ? null : n; }
+  function secEdit(a, s, main) {
+    main.appendChild(h('div', { class: 'eyebrow', text: 'Editando esta tela' }));
+    var idx = a.sections.indexOf(s);
+    main.appendChild(h('div', { class: 'card-ed' },
+      field('Nome da aba (curto)', inp(s.label, function (v) { s.label = v; touch(a.id); var t = document.getElementById('tab-' + s.id); if (t) t.textContent = v || '?'; }, { maxlength: 12, placeholder: 'Ex.: Abertura, 1, 2' })),
+      field('Título da tela', inp(s.title, function (v) { s.title = v; touch(a.id); }, { placeholder: 'Ex.: Uma nota que ninguém alcança' })),
+      h('div', { class: 'grid2' },
+        h('div', null, field('Começa no minuto', inp(numAttr(s.start), function (v) { s.start = toNum(v); touch(a.id); }, { inputmode: 'numeric', placeholder: '0' }))),
+        h('div', null, field('Termina no minuto', inp(numAttr(s.end), function (v) { s.end = toNum(v); touch(a.id); }, { inputmode: 'numeric', placeholder: '10' })))),
+      h('p', { class: 'help', text: 'Os minutos ligam a tela ao relógio: a aba em que a aula deveria estar ganha um ponto vermelho.' }),
+      h('div', { class: 'btnrow' },
+        btn('← Mover tela', function () { if (move(a.sections, idx, -1)) { touch(a.id); renderKeep(); } }),
+        btn('Mover tela →', function () { if (move(a.sections, idx, 1)) { touch(a.id); renderKeep(); } }),
+        confirmBtn('Excluir tela', function () {
+          a.sections.splice(idx, 1); touch(a.id);
+          go(a.id, (a.sections[Math.max(0, idx - 1)] || {}).id || 'versos');
+        }))));
+    s.blocks.forEach(function (b, i) { main.appendChild(blockEditor(a, s, b, i)); });
+    main.appendChild(h('div', { class: 'card-ed' }, h('span', { class: 'lbl', text: 'Adicionar nesta tela' }),
+      h('div', { class: 'addgrid' }, TYPES.map(function (t) {
+        return btn('+ ' + BT[t].name, function () { s.blocks.push(newBlock(t)); touch(a.id); renderKeep(); });
+      }))));
+  }
+  function addSection(a) {
+    var last = a.sections[a.sections.length - 1], st = last && last.end != null ? last.end : 0;
+    var s = newSec(String(a.sections.length), 'Nova tela', st, st + 15, ['ask', 'board', 'say']);
+    a.sections.push(s); touch(a.id); go(a.id, s.id);
+  }
+  function blockEditor(a, s, b, i) {
+    var meta = BT[b.type], body;
+    if (b.type === 'steps') body = stepsEditor(a, b);
+    else if (b.type === 'read') body = readEditor(a, b);
+    else body = area(b.text, function (v) { b.text = v; touch(a.id); }, {
+      rows: b.type === 'board' ? 5 : 3, mono: b.type === 'board',
+      ph: b.type === 'ask' ? 'Ex.: Quem já passou por... ? Me dá um exemplo.' : b.type === 'board' ? 'COLUNA A  ×  COLUNA B' : ''
+    });
+    return h('div', { class: 'card-ed' },
+      h('header', null, h('span', { class: 'tname', text: meta.name }),
+        h('div', { class: 'btnrow' },
+          btn('↑', function () { if (move(s.blocks, i, -1)) { touch(a.id); renderKeep(); } }, '', 'Subir bloco'),
+          btn('↓', function () { if (move(s.blocks, i, 1)) { touch(a.id); renderKeep(); } }, '', 'Descer bloco'),
+          confirmBtn('Excluir', function () { s.blocks.splice(i, 1); touch(a.id); renderKeep(); }))),
+      h('p', { class: 'help', text: meta.help }), body);
+  }
+  function stepsEditor(a, b) {
+    var wrap = h('div');
+    function draw() {
+      wrap.textContent = '';
+      b.items.forEach(function (it, i) {
+        wrap.appendChild(h('div', { class: 'step-ed' },
+          inp(it.t, function (v) { it.t = v; touch(a.id); }, { placeholder: 'Ponto (ex.: O texto responde ao que eles disseram)' }),
+          area(it.s, function (v) { it.s = v; touch(a.id); }, { rows: 2, ph: 'Detalhe (opcional). Pode citar versículos, ex.: Rm 3:23' }),
+          h('div', { class: 'btnrow' },
+            btn('↑', function () { if (move(b.items, i, -1)) { touch(a.id); draw(); } }, '', 'Subir ponto'),
+            btn('↓', function () { if (move(b.items, i, 1)) { touch(a.id); draw(); } }, '', 'Descer ponto'),
+            confirmBtn('Excluir ponto', function () { b.items.splice(i, 1); touch(a.id); draw(); }))));
+      });
+      wrap.appendChild(btn('+ Adicionar ponto', function () { b.items.push({ t: '', s: '' }); touch(a.id); draw(); }));
+      flushFit();
+    }
+    draw();
+    return wrap;
+  }
+  function readEditor(a, b) {
+    var wrap = h('div'), prev = h('div', { class: 'rprev' });
+    function upd() {
+      prev.textContent = '';
+      if (!(b.ref || '').trim()) { prev.textContent = 'Digite a referência, ex.: Rm 3:23'; return; }
+      var r = parseRef(b.ref, bookKey(a));
+      if (!r) { prev.appendChild(h('span', { class: 'bad', text: 'Não entendi essa referência. Use Livro capítulo:versículo, ex.: Rm 3:23 ou Romanos 3:23-24.' })); return; }
+      var info = lookup(a, r);
+      if (info.text) { prev.appendChild(h('span', { class: 'ok', text: refTitle(r) })); prev.appendChild(txt(info.text)); }
+      else {
+        prev.appendChild(h('span', { class: 'bad', text: refTitle(r) + ': texto ainda não cadastrado.' }));
+        prev.appendChild(btn('Cadastrar texto', function () { addVerse(a, refTitle(r)); }));
+      }
+    }
+    wrap.appendChild(inp(b.ref, function (v) { b.ref = v; touch(a.id); upd(); }, { placeholder: 'Ex.: Rm 3:23' }));
+    wrap.appendChild(prev); upd();
+    return wrap;
+  }
+
+  /* ---- versiculos ---- */
+  function addVerse(a, ref) {
+    a.verses = a.verses || [];
+    var r = parseRef(ref, bookKey(a)), ex = null;
+    if (r) a.verses.forEach(function (v) { var q = parseRef(v.ref, bookKey(a)); if (q && refTitle(q) === refTitle(r)) ex = v; });
+    if (!ex) { ex = { id: uid(), ref: ref || '', text: '', must: false }; a.verses.push(ex); touch(a.id); }
+    focusVerse = ex.id; go(a.id, 'versos');
+  }
+  function versosPane(a, main) {
+    main.appendChild(h('div', { class: 'eyebrow', text: 'Versículos desta aula' }));
+    main.appendChild(h('h1', { text: 'Versículos' }));
+    var vs = a.verses || [];
+    if (!editing) {
+      if (!vs.length) main.appendChild(h('div', { class: 'empty' }, h('p', { text: 'Nenhum versículo cadastrado nesta aula.' })));
+      vs.forEach(function (v) {
+        var r = parseRef(v.ref, bookKey(a));
+        main.appendChild(h('div', { class: 'readbox' + (v.must ? ' must' : '') },
+          h('span', { class: 'lbl reftitle', text: r ? refTitle(r) : v.ref }),
+          h('div', { class: 'verse' + ((v.text || '').trim() ? '' : ' none'), text: (v.text || '').trim() || 'Texto ainda não cadastrado.' })));
+      });
+      return;
+    }
+    main.appendChild(h('p', { class: 'help', text: 'Cole aqui o texto do versículo, da Bíblia que a turma usa. Em qualquer lugar da aula, ao escrever a referência (ex.: Rm 3:23 ou Romanos 3:23), ela vira um toque que abre o texto. Marque "indispensável" para ficar em vermelho.' }));
+    vs.forEach(function (v, i) {
+      var r = parseRef(v.ref, bookKey(a));
+      var ta = area(v.text, function (x) { v.text = x; touch(a.id); }, { rows: 3, ph: 'Cole o texto do versículo' });
+      var refEl = inp(v.ref, function (x) { v.ref = x; touch(a.id); status.textContent = parseRef(x, bookKey(a)) ? 'Referência reconhecida' : 'Não entendi a referência'; status.className = parseRef(x, bookKey(a)) ? 'ok' : 'bad'; }, { placeholder: 'Ex.: Rm 3:23' });
+      var status = h('span', { class: r ? 'ok' : 'bad', text: r ? 'Referência reconhecida' : 'Não entendi a referência' });
+      main.appendChild(h('div', { class: 'card-ed', 'data-vid': v.id },
+        field('Referência', refEl), h('div', { class: 'help' }, status),
+        field('Texto', ta),
+        h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: v.must ? true : null, onchange: function (e) { v.must = e.target.checked; touch(a.id); } }), 'Indispensável (vermelho)'),
+        h('div', { class: 'btnrow' }, confirmBtn('Excluir versículo', function () { a.verses.splice(i, 1); touch(a.id); renderKeep(); }))));
+    });
+    main.appendChild(btn('+ Adicionar versículo', function () {
+      var v = { id: uid(), ref: '', text: '', must: false };
+      a.verses = a.verses || []; a.verses.push(v); touch(a.id); focusVerse = v.id; renderKeep();
+    }, 'primary'));
+    if (focusVerse) {
+      var id = focusVerse; focusVerse = null;
+      requestAnimationFrame(function () {
+        var card = document.querySelector('[data-vid="' + id + '"]');
+        if (card) { var f = card.querySelector('input.f'), t = card.querySelector('textarea'); var tgt = (f && !f.value) ? f : (t || f); if (tgt) { tgt.focus(); card.scrollIntoView({ block: 'center' }); } }
+      });
+    }
+  }
+
+  /* ---- dados da aula ---- */
+  function dadosPane(a, main) {
+    main.appendChild(h('div', { class: 'eyebrow', text: 'Dados da aula' }));
+    main.appendChild(h('h1', { text: 'Dados' }));
+    var bookNote = h('span', { class: 'help' });
+    function bn() { var k = bookKey(a); bookNote.textContent = !(a.book || '').trim() ? 'Opcional. Se preencher, referências sem livro (ex.: 3:23) funcionam.' : k ? 'Livro reconhecido: ' + DISP[k] : 'Não reconheci esse livro.'; bookNote.className = k ? 'ok' : 'help'; }
+    bn();
+    main.appendChild(h('div', { class: 'card-ed' },
+      field('Título da aula', inp(a.title, function (v) { a.title = v; touch(a.id); var n = document.querySelector('.aula-name'); if (n) n.textContent = v || 'Aula sem título'; }, { placeholder: 'Ex.: Lição 3 · Todos pecaram' })),
+      field('Subtítulo (opcional)', inp(a.subtitle, function (v) { a.subtitle = v; touch(a.id); }, { placeholder: 'Ex.: Romanos 3:9-26' })),
+      field('Data da aula', inp(a.date, function (v) { a.date = v; touch(a.id); }, { type: 'date' })),
+      field('Livro principal (opcional)', inp(a.book, function (v) { a.book = v; touch(a.id); bn(); }, { placeholder: 'Ex.: Romanos' })),
+      bookNote));
+    main.appendChild(h('div', { class: 'card-ed' }, h('span', { class: 'lbl', text: 'Excluir esta aula' }),
+      h('p', { class: 'help', text: 'Remove a aula inteira. Não dá para desfazer.' }),
+      confirmBtn('Excluir aula', function () { removeAula(a.id); })));
+  }
+
+  /* ================= Relogio ================= */
+  function clockKey() { return 'ini-' + route.aula; }
+  function startedAt() { try { return parseInt(localStorage.getItem(clockKey()), 10) || 0; } catch (e) { return 0; } }
+  function toggleClock(a) {
+    var s = startedAt();
+    if (!s) { try { localStorage.setItem(clockKey(), String(Date.now())); } catch (e) {} }
+    else {
+      var c = document.getElementById('clock');
+      if (!c.dataset.armed) {
+        c.dataset.armed = '1'; c.textContent = 'Zerar?';
+        setTimeout(function () { delete c.dataset.armed; tick(); }, 3000);
+        return;
+      }
+      try { localStorage.removeItem(clockKey()); } catch (e) {}
+      delete c.dataset.armed;
+    }
+    tick();
+  }
+  function tick() {
+    var c = document.getElementById('clock'); if (!c || !route.aula || c.dataset.armed) return;
+    var s = startedAt(), m = s ? Math.floor((Date.now() - s) / 60000) : -1;
+    if (m < 0) { c.textContent = '▶ Iniciar'; c.classList.remove('running'); }
+    else { c.textContent = '⏱ ' + m + ' min'; c.classList.add('running'); }
+    var a = aulas[route.aula];
+    Array.prototype.forEach.call(document.querySelectorAll('.tabs a[data-sec]'), function (t) {
+      var sec = a && a.sections.filter(function (x) { return x.id === t.getAttribute('data-sec'); })[0];
+      var now = !!(sec && m >= 0 && sec.start != null && sec.end != null && m >= sec.start && m < sec.end);
+      t.classList.toggle('now', now);
+    });
+  }
+  setInterval(tick, 15000);
+
+  /* ================= Teclado, tela ligada ================= */
+  document.addEventListener('focusin', function (e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) document.body.classList.add('typing');
+  });
+  document.addEventListener('focusout', function () {
+    setTimeout(function () {
+      var el = document.activeElement;
+      if (!(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'))) {
+        document.body.classList.remove('typing');
+        if (pendingRemote) { pendingRemote = false; renderKeep(); }
+      }
+    }, 120);
+  });
+  var lock = null;
+  function wake() {
+    try { if (navigator.wakeLock && document.visibilityState === 'visible') navigator.wakeLock.request('screen').then(function (l) { lock = l; }).catch(function () {}); } catch (e) {}
+  }
+  document.addEventListener('pointerdown', function once() { wake(); document.removeEventListener('pointerdown', once); });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && lock) wake(); });
+
+  /* ================= Inicio ================= */
+  function init() {
+    route = parseHash(); lsLoad(); dbReady = true; render();
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+    }
+  }
+  init();
+})();
+</script>
+</body>
+</html>

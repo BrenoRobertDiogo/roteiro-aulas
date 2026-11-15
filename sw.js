@@ -1,5 +1,5 @@
 /* Deixa o app funcionar sem internet. Troque o número da versão quando publicar uma atualização. */
-var CACHE = 'roteiro-aulas-v1';
+var CACHE = 'roteiro-aulas-v2';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', function (e) {

@@ -597,6 +597,7 @@ details.card-ed p { margin: 6px 0; }
     if (location.hash === t) onRoute(); else location.hash = t;
   }
   function onRoute() {
+    if (!bg.hidden) closeSheet();
     var prev = route.aula;
     route = parseHash();
     if (route.aula !== prev && !pendingEdit) editing = false;
@@ -705,8 +706,11 @@ details.card-ed p { margin: 6px 0; }
   function isStandalone() {
     try { return window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); } catch (e) { return false; }
   }
-  var MARK = '[[roteiro-aulas]]';
-  function exportText(list) { return MARK + JSON.stringify({ app: 'roteiro-aulas', v: 1, aulas: list }); }
+  function exportText(list) { return JSON.stringify({ app: 'roteiro-aulas', v: 1, aulas: list }); }
+  var MODELO = {"app": "roteiro-aulas", "v": 1, "aulas": [{"chave": "romanos-03-2026-11-15", "title": "Todos pecaram", "subtitle": "Romanos 3:9-26", "date": "2026-11-15", "book": "Romanos", "sections": [{"label": "Abertura", "title": "Uma nota que ninguém alcança", "start": 0, "end": 10, "blocks": [{"type": "say", "text": "Imagine uma prova em que a nota de corte é 100. Ninguém da sala tira 100."}, {"type": "ask", "text": "Quem concorda que existe uma nota de corte que a gente não alcança sozinho? Me dá um exemplo do dia a dia."}, {"type": "board", "text": "NOTA DE CORTE: 100\n(escrever o que a turma disser)"}]}, {"label": "1", "title": "Todos ficam aquém", "start": 10, "end": 30, "blocks": [{"type": "ask", "text": "Quem acha que as pessoas boas não precisam de ajuda de Deus? Por quê?"}, {"type": "read", "ref": "Rm 3:23"}, {"type": "steps", "items": [{"t": "O texto não deixa ninguém de fora", "s": "Compare com o quadro. Veja também Rm 6:23."}]}, {"type": "manga", "text": "Ideia extra, um item por linha"}, {"type": "avoid", "text": "Cuidado a tomar, um item por linha"}]}, {"label": "Fechar", "title": "Silêncio e oração", "start": 30, "end": 40, "blocks": [{"type": "board", "text": "RESUMO DA AULA"}, {"type": "steps", "items": [{"t": "Um minuto de silêncio", "s": "Pergunta para levar para a semana"}, {"t": "Oração", "s": ""}]}]}], "verses": [{"ref": "Rm 3:23", "text": "Porque todos pecaram e destituídos estão da glória de Deus;", "must": true}, {"ref": "Rm 6:23", "text": "", "must": false}]}]};
+  var REGRAS = ["Tipos de bloco aceitos: ask, board, say, read, steps, manga, avoid, note. Outros tipos são ignorados.", "label é o nome curto da aba (até 12 caracteres): Abertura, 1, 2, Fechar. start e end são minutos desde o início da aula.", "ask: pergunta de posição (\"quem concorda?\") ou de exemplo (\"me dá uma situação em que...\"). Nunca peça para achar a resposta no texto.", "board: texto puro do que escrever no quadro, em blocos simples (colunas, linha do tempo). Use \\n para quebrar linha.", "read: só a referência do versículo curto para ler em voz alta. O texto vem de verses.", "steps: o que dizer depois que a turma reagir. t é o ponto, s é o detalhe. Cada ponto deve se apoiar na Bíblia, citando o versículo.", "Referências como \"Rm 3:23\" ou \"Romanos 3:23-24\" viram toque na tela. Escreva sempre com o livro.", "verses: um item para cada versículo citado. Use somente o texto real da Bíblia usada pela turma. Se não tiver certeza do texto, deixe \"text\": \"\" (o app mostra \"abra na sua Bíblia\"). Nunca invente texto bíblico. must: true marca os indispensáveis (ficam em vermelho).", "chave: identificador fixo da aula. Importar de novo com a mesma chave pergunta se quer substituir a aula.", "date no formato AAAA-MM-DD. Não use \"se apertar\" nem \"reserva\": o professor dispensa essas partes."];
+  var MODELO_TEXTO = 'Gere a aula em um único bloco de código JSON, sem texto fora dele, neste formato:\n\n' + JSON.stringify(MODELO, null, 2) +
+    '\n\nRegras:\n' + REGRAS.map(function (r, i) { return (i + 1) + '. ' + r; }).join('\n');
   function fileName(list) {
     var t = list.length === 1 ? (list[0].title || 'aula') : 'aulas';
     return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'aula';
@@ -722,7 +726,7 @@ details.card-ed p { margin: 6px 0; }
     else fallback();
   }
   function downloadFile(s, name) {
-    var url = URL.createObjectURL(new Blob([s], { type: 'text/plain' }));
+    var url = URL.createObjectURL(new Blob([s], { type: /\.json$/.test(name) ? 'application/json' : 'text/plain' }));
     var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click();
     setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
   }
@@ -736,63 +740,161 @@ details.card-ed p { margin: 6px 0; }
   function showExport(list) {
     var text = exportText(list), name = fileName(list), msg = h('p', { class: 'help' });
     openPanel(list.length === 1 ? 'Exportar aula' : 'Exportar ' + list.length + ' aulas', [
-      h('p', { class: 'help', text: 'Mande para outro professor pelo WhatsApp. Quem receber toca em "Importar aula" e cola o texto ou escolhe o arquivo.' }),
+      h('p', { class: 'help', text: 'Mande para outro professor pelo WhatsApp. Quem receber toca em "Importar aula" e cola o texto ou escolhe o arquivo. O texto é um JSON: um chat também consegue ler.' }),
       h('div', { class: 'btnrow' },
         btn('Copiar texto', function () { copyText(text, function (ok) { msg.className = ok ? 'ok' : 'bad'; msg.textContent = ok ? 'Texto copiado. Cole numa conversa.' : 'Não consegui copiar. Use "Baixar arquivo".'; }); }, 'primary'),
         navigator.share ? btn('Compartilhar', function () { navigator.share({ title: 'Roteiro de aula', text: text }).catch(function () {}); }) : null,
-        btn('Baixar arquivo', function () { downloadFile(text, name + '.txt'); msg.className = 'ok'; msg.textContent = 'Arquivo gerado.'; })),
+        btn('Baixar arquivo', function () { downloadFile(text, name + '.json'); msg.className = 'ok'; msg.textContent = 'Arquivo gerado.'; })),
       msg
     ]);
   }
-  function cleanAula(a) {
-    var c = JSON.parse(JSON.stringify(a)), id = uid();
-    c.id = id; c.createdAt = Date.now(); c.updatedAt = Date.now();
-    c.title = String(c.title || 'Aula importada'); c.subtitle = String(c.subtitle || ''); c.book = String(c.book || '');
-    c.date = /^\d{4}-\d\d-\d\d$/.test(c.date || '') ? c.date : today();
-    c.verses = (Array.isArray(c.verses) ? c.verses : []).filter(function (v) { return v && typeof v === 'object'; }).map(function (v) {
-      return { id: /^[a-z0-9]+$/.test(v.id || '') ? v.id : uid(), ref: String(v.ref || ''), text: String(v.text || ''), must: !!v.must };
+  /* ---- importar aula (JSON) ---- */
+  function str(v) { return Array.isArray(v) ? v.filter(function (x) { return x != null; }).map(String).join('\n') : (v == null ? '' : String(v)); }
+  function num(v) {
+    var n = typeof v === 'number' ? v : (typeof v === 'string' && /^\s*\d+\s*$/.test(v) ? parseInt(v, 10) : NaN);
+    return isFinite(n) && n >= 0 ? Math.round(n) : null;
+  }
+  function okId(v, used) {
+    var id = /^[a-z0-9]+$/.test(v || '') && !used[v] ? v : uid();
+    while (used[id]) id = uid();
+    used[id] = 1; return id;
+  }
+  function pick(o, names) { for (var i = 0; i < names.length; i++) if (o[names[i]] != null) return o[names[i]]; return null; }
+  function cleanAula(a, warns, who) {
+    var c = {
+      id: uid(), title: str(pick(a, ['title', 'titulo'])).trim() || 'Aula importada', subtitle: str(pick(a, ['subtitle', 'subtitulo'])).trim(),
+      date: '', book: str(pick(a, ['book', 'livro'])).trim(), chave: str(pick(a, ['chave', 'key'])).trim().slice(0, 80),
+      createdAt: Date.now(), updatedAt: Date.now(), sections: [], verses: []
+    };
+    var d = str(pick(a, ['date', 'data'])).trim();
+    c.date = /^\d{4}-\d\d-\d\d$/.test(d) ? d : today();
+    var used = {}, ignored = 0;
+    (Array.isArray(a.sections) ? a.sections : []).forEach(function (x, si) {
+      if (!x || typeof x !== 'object') { warns.push(who + ': a tela ' + (si + 1) + ' é inválida e foi ignorada.'); return; }
+      var sec = { id: okId(x.id, used), label: str(x.label).trim().slice(0, 12), title: str(x.title).trim(), start: num(x.start), end: num(x.end), blocks: [] };
+      if (!sec.label) sec.label = String(c.sections.length + 1);
+      (Array.isArray(x.blocks) ? x.blocks : []).forEach(function (b) {
+        if (!b || typeof b !== 'object' || !BT[b.type]) { ignored++; return; }
+        var blk = { id: uid(), type: b.type, text: str(b.text), ref: str(b.ref).trim(), items: [] };
+        if (b.type === 'steps') {
+          blk.items = (Array.isArray(b.items) ? b.items : []).filter(function (it) { return it != null; }).map(function (it) {
+            return typeof it === 'object' ? { t: str(it.t), s: str(it.s) } : { t: String(it), s: '' };
+          });
+        }
+        sec.blocks.push(blk);
+      });
+      c.sections.push(sec);
     });
-    c.sections = c.sections.filter(function (x) { return x && typeof x === 'object'; }).map(function (x) {
-      return {
-        id: /^[a-z0-9]+$/.test(x.id || '') ? x.id : uid(), label: String(x.label || ''), title: String(x.title || ''),
-        start: typeof x.start === 'number' ? x.start : null, end: typeof x.end === 'number' ? x.end : null,
-        blocks: (Array.isArray(x.blocks) ? x.blocks : []).filter(function (b) { return b && BT[b.type]; }).map(function (b) {
-          return {
-            id: /^[a-z0-9]+$/.test(b.id || '') ? b.id : uid(), type: b.type, text: String(b.text || ''), ref: String(b.ref || ''),
-            items: (Array.isArray(b.items) ? b.items : []).filter(Boolean).map(function (it) { return { t: String(it.t || ''), s: String(it.s || '') }; })
-          };
-        })
-      };
+    if (!c.sections.length) { warns.push(who + ': sem telas em "sections". Ignorada.'); return null; }
+    if (ignored) warns.push(who + ': ' + ignored + (ignored === 1 ? ' bloco ignorado' : ' blocos ignorados') + ' (tipo desconhecido ou vazio).');
+    (Array.isArray(a.verses) ? a.verses : []).forEach(function (v) {
+      if (!v || typeof v !== 'object') return;
+      var ref = str(v.ref).trim(); if (!ref) return;
+      if (!parseRef(ref, bookKey(c))) warns.push(who + ': não entendi a referência "' + ref + '" em verses. Use o formato Rm 3:23.');
+      c.verses.push({ id: uid(), ref: ref, text: str(v.text).trim(), must: v.must === true || v.must === 'true' });
     });
+    var missing = {};
+    c.sections.forEach(function (sc) {
+      sc.blocks.forEach(function (b) {
+        if (b.type !== 'read' || !b.ref) return;
+        var r = parseRef(b.ref, bookKey(c));
+        if (!r) warns.push(who + ': não entendi a referência "' + b.ref + '" no bloco de leitura.');
+        else if (!lookup(c, r).text) missing[refTitle(r)] = 1;
+      });
+    });
+    var mk = Object.keys(missing);
+    if (mk.length) warns.push('Sem texto cadastrado: ' + mk.join(', ') + '. O app vai pedir para abrir na Bíblia.');
     return c;
   }
-  function importText(s) {
-    var i = s.indexOf('{'), j = s.lastIndexOf('}');
-    if (i < 0 || j <= i) return 0;
-    var data; try { data = JSON.parse(s.slice(i, j + 1)); } catch (e) { return 0; }
-    var list = Array.isArray(data.aulas) ? data.aulas : (data.aula ? [data.aula] : []), n = 0;
-    list.forEach(function (a) {
-      if (!a || typeof a !== 'object' || !Array.isArray(a.sections)) return;
-      var c = cleanAula(a); aulas[c.id] = c; touch(c.id); n++;
+  function listFrom(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.aulas)) return data.aulas;
+    if (data && data.aula && typeof data.aula === 'object') return [data.aula];
+    if (data && Array.isArray(data.sections)) return [data];
+    return [];
+  }
+  function parseImport(text) {
+    var raw = String(text || '');
+    if (!raw.trim()) return { error: 'Cole o JSON da aula no campo.' };
+    if (raw.length > 2000000) return { error: 'O texto é grande demais para importar.' };
+    var cands = [], fence = /```(?:json)?\s*([\s\S]*?)```/i.exec(raw);
+    if (fence) cands.push(fence[1]);
+    cands.push(raw);
+    var i = raw.indexOf('{'), j = raw.lastIndexOf('}'); if (i >= 0 && j > i) cands.push(raw.slice(i, j + 1));
+    var k = raw.indexOf('['), l = raw.lastIndexOf(']'); if (k >= 0 && l > k) cands.push(raw.slice(k, l + 1));
+    var data = null, lastErr = '';
+    for (var q = 0; q < cands.length && data === null; q++) {
+      try { var d = JSON.parse(cands[q].replace(/^﻿/, '').trim()); if (d && typeof d === 'object') data = d; } catch (e) { lastErr = e.message; }
+    }
+    if (data === null) return { error: 'Não consegui ler como JSON. Confira se copiou tudo, do primeiro { até o último }. (' + lastErr + ')' };
+    var arr = listFrom(data), warns = [], list = [];
+    arr.forEach(function (a, n) {
+      if (!a || typeof a !== 'object') return;
+      var c = cleanAula(a, warns, arr.length > 1 ? 'Aula ' + (n + 1) : 'A aula'); if (c) list.push(c);
     });
-    return n;
+    if (!list.length) return { error: 'Não encontrei nenhuma aula com telas ("sections") nesse JSON.', warns: warns };
+    return { list: list, warns: warns };
+  }
+  function findByChave(ch) {
+    var r = null;
+    Object.keys(aulas).forEach(function (k) { if (aulas[k].chave && aulas[k].chave === ch) r = aulas[k]; });
+    return r;
+  }
+  function commitImport(list, replace) {
+    list.forEach(function (c) {
+      var ex = replace && c.chave ? findByChave(c.chave) : null;
+      if (ex) { c.id = ex.id; c.createdAt = ex.createdAt || c.createdAt; }
+      aulas[c.id] = c; touch(c.id);
+    });
+    lsSave();
   }
   function showImport() {
-    var ta = h('textarea', { class: 'f', rows: 5, placeholder: 'Cole aqui o texto da aula' }), msg = h('p', { class: 'help' });
-    var file = h('input', { type: 'file', class: 'f', accept: '.txt,.json,text/plain,application/json' });
-    function run(s) {
-      var n = importText(s);
-      msg.className = n ? 'ok' : 'bad';
-      msg.textContent = n ? n + (n === 1 ? ' aula importada.' : ' aulas importadas.') : 'Não encontrei uma aula nesse texto.';
-      if (n) setTimeout(function () { closeSheet(); renderKeep(); }, 700);
+    var ta = h('textarea', { class: 'f', rows: 6, placeholder: 'Cole aqui o JSON da aula' });
+    var out = h('div');
+    var file = h('input', { type: 'file', class: 'f', accept: '.json,.txt,application/json,text/plain' });
+    function say(kind, text) { out.appendChild(h('p', { class: kind, text: text })); }
+    function warnList(w) { if (w && w.length) out.appendChild(h('ul', { class: 'help' }, w.map(function (x) { return h('li', { text: x }); }))); }
+    function openFirst(res) {
+      closeSheet();
+      var first = res.list[0];
+      if (res.list.length === 1 && first.sections[0]) go(first.id, first.sections[0].id); else renderKeep();
+    }
+    function finish(res, replace) {
+      commitImport(res.list, replace);
+      renderKeep();
+      out.textContent = '';
+      var n = res.list.length;
+      say('ok', n + (n === 1 ? ' aula importada e salva neste aparelho.' : ' aulas importadas e salvas neste aparelho.'));
+      warnList(res.warns);
+      if (!res.warns.length) setTimeout(function () { openFirst(res); }, 600);
+      else out.appendChild(h('div', { class: 'btnrow' }, btn(n === 1 ? 'Abrir aula' : 'Ver aulas', function () { openFirst(res); }, 'primary')));
+    }
+    function run(text) {
+      out.textContent = '';
+      var res = parseImport(text);
+      if (res.error) { say('bad', res.error); warnList(res.warns); return; }
+      var clash = res.list.filter(function (c) { return c.chave && findByChave(c.chave); });
+      if (!clash.length) { finish(res, false); return; }
+      say('help', 'Já existe aula com a mesma chave: ' + clash.map(function (c) { return '"' + findByChave(c.chave).title + '"'; }).join(', ') + '. Substituir apaga as edições feitas nela.');
+      out.appendChild(h('div', { class: 'btnrow' }, btn('Substituir', function () { finish(res, true); }, 'primary'), btn('Importar como nova', function () { finish(res, false); })));
     }
     file.addEventListener('change', function () {
       var f = file.files && file.files[0]; if (!f) return;
-      var r = new FileReader(); r.onload = function () { run(String(r.result)); }; r.readAsText(f);
+      var r = new FileReader(); r.onload = function () { ta.value = String(r.result); run(String(r.result)); file.value = ''; }; r.readAsText(f);
     });
+    var canPaste = !!(navigator.clipboard && navigator.clipboard.readText);
     openPanel('Importar aula', [
-      field('Texto da aula', ta), btn('Importar texto', function () { run(ta.value); }, 'primary'),
-      field('Ou escolha um arquivo', file), msg
+      h('p', { class: 'help', text: 'Cole o JSON gerado pelo chat (pode vir com ```json em volta). A aula fica salva neste aparelho.' }),
+      canPaste ? h('div', { class: 'btnrow' }, btn('Colar da área de transferência', function () {
+        navigator.clipboard.readText().then(function (t) { ta.value = t; run(t); }, function () { out.textContent = ''; say('bad', 'Não consegui ler a área de transferência. Cole no campo abaixo.'); });
+      }, 'primary')) : null,
+      field('Ou cole o texto aqui', ta),
+      h('div', { class: 'btnrow' }, btn('Importar', function () { run(ta.value); }, canPaste ? '' : 'primary')),
+      field('Ou escolha um arquivo .json', file),
+      h('div', { class: 'btnrow' }, btn('Copiar modelo para o chat', function () {
+        copyText(MODELO_TEXTO, function (ok) { out.textContent = ''; say(ok ? 'ok' : 'bad', ok ? 'Modelo copiado. Cole no chat e peça a aula nesse formato.' : 'Não consegui copiar o modelo.'); });
+      })),
+      out
     ]);
   }
 
